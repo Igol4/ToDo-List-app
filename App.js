@@ -1,6 +1,6 @@
 import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList, Alert} from 'react-native';
+import {SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity, FlatList, Alert, Image, Linking} from 'react-native';
 const App = () => {
   const [textInput, setTextInput] = React.useState('');
   const [todos, setTodos] = React.useState([]);
@@ -11,6 +11,17 @@ const App = () => {
     saveTodoTouserDevice(todos);
   }, [todos]);
 
+  const clearAllTodos = () => {
+    Alert.alert('Confirm', 'Clear todos?', [
+      {
+        text: 'Yes',
+        onPress: () => setTodos([]),
+      },
+      {
+        text: 'No',
+      },
+    ]);
+  };
   const ListItem = ({todo}) => {
     return <View style={styles.listItem}>
       <View style={{flex: 1}}>
@@ -25,11 +36,11 @@ const App = () => {
       {
         !todo?.completed && (
           <TouchableOpacity style={[styles.actionIcon]} onPress={()=>markTodoComplete(todo?.id)}>
-            <Text size={20} color={'#fff'}>Done</Text>
+            <Image style={styles.pic} source={require("./assets/complete.png")}/>
           </TouchableOpacity>
         )}
-      <TouchableOpacity style={[styles.actionIco,{backgroundColor: '#f00'}]}onPress={()=>deleteTodo(todo?.id)}>
-        <Text size={20} color={'#f00'}>Delete</Text>
+      <TouchableOpacity style={[styles.actionIcon,{backgroundColor: '#fff'}]}onPress={()=>deleteTodo(todo?.id)}>
+      <Image style={styles.pic} source={require("./assets/delete.png")}/>
       </TouchableOpacity>
     </View>
   };
@@ -37,7 +48,7 @@ const App = () => {
   const saveTodoTouserDevice = async todos => {
     try {
       const stringifyTodos = JSON.stringify(todos);
-      await AsyncStorage.setItem('@todos', stringifyTodos);
+      await AsyncStorage.setItem('todos', stringifyTodos);
     } catch (e) {
       console.log(e);
       // saving error
@@ -46,7 +57,7 @@ const App = () => {
   const getTodosFromUserDevice = async () => {
     try {
       const todos = await AsyncStorage.getItem('todos');
-      if(todos != null){
+      if (todos != null) {
         setTodos(JSON.parse(todos));
       }
     } catch(error) {
@@ -80,19 +91,27 @@ const App = () => {
     const newTodos = todos.filter(item => item.id != todoId);
     setTodos(newTodos);
   };
-  const clearTodos = () => {
-    Alert.alert('Confirm', 'Clear todos?', [
+  {/*
+  const report = () => {
+    Alert.alert('Report a problem', 'Email: ivangolubic8@gmail.com', [
       {
-        text: 'Yes',
-        onPress:() => setTodos([]),
+        text: 'Email',
+        onPress: () => Linking.openURL("mailto:ivangolubic8@gmail.com"),
       },
-      {text:'No'},
-    ])
-  }
+      {
+        text: 'Close',
+      },
+    ]);
+  };*/}
   return <SafeAreaView style={styles.safearea}>
     <View style={styles.header}>
       <Text style={styles.title}>ToDo List</Text>
-      <Text size={25} color="#f00" onPress={clearTodos}>Delete</Text>
+      <TouchableOpacity onPress={() => Linking.openURL('mailto:ivangolubic8@gmail.com')}>
+        <Text style={styles.report}>Report a problem</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={clearAllTodos}>
+        <Image style={styles.pic} source={require("./assets/delete.png")} />
+      </TouchableOpacity>
     </View>
     <FlatList 
     showsHorizontalScrollIndicator={false}
@@ -105,7 +124,7 @@ const App = () => {
       </View>
       <TouchableOpacity onPress={addTodo}>
         <View style={styles.iconContainer}>
-          <Text color={'#fff'} size={30}>Add</Text>
+          <Text color={'#fff'} size={100}>+</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -113,10 +132,19 @@ const App = () => {
   </SafeAreaView>
 };
 const styles = StyleSheet.create({
+  report:{
+    color: '#1f145c',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  pic: {
+    width: 25,
+    height: 25,
+  },
   actionIcon:{
     height: 25,
     width: 25,
-    backgroundColor: '#008000',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 5,
@@ -156,7 +184,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   inputContainer:{
-    backgroundColor: '#fff',
+    backgroundColor: '#1f145c',
     elevation: 40,
     flex: 1,
     height: 50,
